@@ -7,31 +7,27 @@ function getRandomItems(array, count = 4) {
 }
 
 export default function useRandomProducts(url) {
-  const { data, isLoading, isError, error , rate , count } = useFetch(url);
+  const { data, isLoading, isError, error } = useFetch(url);
 
   const [popular, setPopular] = useState([]);
   const [discounted, setDiscounted] = useState([]);
 
   useEffect(() => {
-    const popularProducts = data.filter(
-      (item) => item.rating?.rate >= 4
-    );
+    const list = Array.isArray(data) ? data : [];
 
-    const discountedProducts = data.filter(
-      (item) => item.rating?.count >= 300
-    );
+    const popularProducts = list.filter((item) => item.rating?.rate >= 4);
+
+    const discountedProducts = list
+      .filter((item) => item.rating?.count >= 300)
+      .map((item) => ({
+        ...item,
+        isDiscounted: true,
+        discountPercent: 20,
+      }));
 
     setPopular(getRandomItems(popularProducts, 4));
     setDiscounted(getRandomItems(discountedProducts, 4));
   }, [data]);
 
-  return {
-    popular,
-    discounted,
-    isLoading,
-    isError,
-    error,
-    rate,
-    count
-  };
+  return { popular, discounted, isLoading, isError, error };
 }
